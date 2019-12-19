@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">GitRepo</string>
+    <string name="hint_name">name</string>
+
+    <string name="hint_desc">type description here</string>
+    <string name="description">Description:</string>
+
+    <string name="filter">filter</string>
+    <string name="done">Done</string>
+    <string name="refresh">refresh</string>
+
+
+
+    <string name="topic">Topics:</string>
+    <string name="hint_topic">type a topics:</string>
+    <string name="language">Language:</string>
+    <string name="hint_language">type a Language:</string>
+
+</resources>

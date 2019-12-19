@@ -1,0 +1,2 @@
+include ':app'
+rootProject.name='SyftApp_Kotlin_Mvvm'

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/main_content"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/glStart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_begin="8dp"/>
+
+    <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/glEnd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_end="8dp"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/glMiddle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintGuide_percent="0.24" />
+
+
+    <TextView
+        android:id="@+id/txtvwDl_Topics"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:text="@string/topic"
+        android:textColor="@color/colorEditText"
+        app:layout_constraintStart_toStartOf="@id/glStart"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/edtDl_Topics"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:hint="@string/hint_topic"
+        android:minWidth="40dp"
+        app:layout_constraintStart_toEndOf="@id/glMiddle"
+        app:layout_constraintBottom_toBottomOf="@id/txtvwDl_Topics"/>
+
+
+    <TextView
+        android:id="@+id/txtvwDl_Language"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/language"
+        android:textColor="@color/colorEditText"
+        android:layout_marginTop="30dp"
+        app:layout_constraintStart_toStartOf="@id/glStart"
+        app:layout_constraintTop_toBottomOf="@id/edtDl_Topics" />
+
+    <EditText
+        android:id="@+id/edtDl_Language"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:hint="@string/hint_language"
+        android:minWidth="40dp"
+        app:layout_constraintBottom_toBottomOf="@+id/txtvwDl_Language"
+        app:layout_constraintStart_toEndOf="@id/glMiddle"
+        app:layout_constraintVertical_bias="0.495" />
+
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
