@@ -1,6 +1,7 @@
 package syft.com.syftapp_kotlin_mvvm.ui.main
 
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
@@ -11,19 +12,21 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import dagger.android.support.DaggerAppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import syft.com.syftapp_kotlin_mvvm.R
-import syft.com.syftapp_kotlin_mvvm.utils.VerticalSpacingItemDecorator
+import syft.com.syftapp_kotlin_mvvm.models.GitResult
+import syft.com.syftapp_kotlin_mvvm.models.ItemList
+import syft.com.syftapp_kotlin_mvvm.models.SearchQuery
+import syft.com.syftapp_kotlin_mvvm.utils.*
 import syft.com.syftapp_kotlin_mvvm.viewmodels.ViewModelProviderFactory
 import javax.inject.Inject
 
-class MainActivity  : DaggerAppCompatActivity() {
 
-    private val LOG_TAG = "ReposMainAct"
+class MainActivity  : DaggerAppCompatActivity() {
 
       companion object {
          var searchString: String = ""
@@ -36,7 +39,15 @@ class MainActivity  : DaggerAppCompatActivity() {
     lateinit  var mainViewModel: MainViewModel
 
     @set:Inject
-    var providerFactory: ViewModelProviderFactory? = null
+    lateinit var providerFactory: ViewModelProviderFactory
+
+    private val waitingTime = 2000
+    private var cntr: CountDownTimer? = null
+
+    private  var mItemListList: MutableList<ItemList> = ArrayList()
+
+    private var isQueryExhausted:Boolean = false
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,36 +57,29 @@ class MainActivity  : DaggerAppCompatActivity() {
 
         progressBar.visibility = View.GONE
 
-        mainViewModel = ViewModelProviders.of(this, providerFactory).get( MainViewModel::class.java )
+        mainViewModel = ViewModelProvider(this, providerFactory).get( MainViewModel::class.java )
 
         observeRepos()
 
+
     }
 
 
-    fun getReposFromServer(filter_search :String ,filter_topics: String?, filter_language: String? ,page_number:Int =0)
-    {
-        Toast.makeText(this, "Topics : $filter_topics \n  Language: $filter_language",Toast.LENGTH_SHORT).show()
-        mainViewModel.getReposFromServer(filter_search, filter_topics, filter_language , page_number)
-    }
 
     private fun observeRepos() {
-        mainViewModel.observeReposFromServer().observe(this, Observer { repos ->
+        mainViewModel.apiData.observe(this, Observer {
 
-            txtVwCount.setText("total item count is: "+repos?.total_count.toString())
-
+           // prepareUiFromGenericData(it)
+            Log.d( "filterTest", "observer 1 triggered "     )
         })
 
-        mainViewModel.observeItemList().observe(this, Observer {
-
-            if(!it.isNullOrEmpty())
-                if(it.size>0) {
-                    mAdapter.setReposInAdapter(it)
-                    progressBar.visibility = View.GONE
-                }
-
+        mainViewModel.liveResult.observe(this, Observer {
+            Log.d( "filterTest", "observer 2 triggered "     )
+            prepareUiFromGenericData(it)
         })
     }
+
+
 
 
     private fun initRecyclerView() {
@@ -90,8 +94,10 @@ class MainActivity  : DaggerAppCompatActivity() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 if(!mRecycleVw.canScrollVertically(1))
                 {
-                   // Toast.makeText(this@MainActivity,"Need to pagination",Toast.LENGTH_SHORT ).show()
-                    mainViewModel.searchNextPage()
+                    if(!isQueryExhausted)   {
+                            progressBar.visibility = View.VISIBLE
+                            mainViewModel.searchNextPage()
+                        }
 
                 }
             }
@@ -104,6 +110,8 @@ class MainActivity  : DaggerAppCompatActivity() {
 
 
 
+//region ....optionsMenu
+
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         val inflater = menuInflater
         inflater.inflate(R.menu.main_menu, menu)
@@ -115,26 +123,36 @@ class MainActivity  : DaggerAppCompatActivity() {
         searchView.setOnQueryTextListener(object: SearchView.OnQueryTextListener{
 
             override fun onQueryTextSubmit(query: String?): Boolean {
-                query?.let {
-                    if(it.trim().length>0) {
-                        progressBar.visibility = View.VISIBLE
-
-                        searchString = it
-
-                        clearOldCalls()
-                        // mainViewModel.clearRetrofitCall()
-                        getReposFromServer(it,"","")
-
-                        //  observeRepos()
-                    }
-                }
-
                 return false
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
+                newText?.let {
+                    if(it.trim().length>0) {
+                        progressBar.visibility = View.VISIBLE
 
-                 return false;
+                cntr?.cancel()
+
+                cntr = object : CountDownTimer(waitingTime.toLong(), 500) {
+                    override fun onTick(millisUntilFinished: Long) {
+                        Log.d( "shaonmvvm", "seconds remaining: " + millisUntilFinished / 1000       )          }
+
+                    override fun onFinish() {
+                        Log.d("shaonmvvm", "DONE")
+
+                                searchString = it
+
+                                mItemListList.clear()
+
+                                mainViewModel.searchQuery.value = SearchQuery(it,"","",1)
+
+                            }
+                        }
+                    }
+                }
+                cntr?.start()
+                return false
+
             }
 
         })
@@ -146,7 +164,8 @@ class MainActivity  : DaggerAppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.menu_filter -> {
-                setUpFilterDialog();
+                 setUpFilterDialog();
+
                 true
             }
 
@@ -169,27 +188,60 @@ class MainActivity  : DaggerAppCompatActivity() {
         mAlertDialog.setOnShowListener {
             val btnDialog_positive =  mAlertDialog.getButton(AlertDialog.BUTTON_POSITIVE)
             btnDialog_positive.setOnClickListener {
-                clearOldCalls();
-                if(searchString.trim().length >0)
-                    getReposFromServer( searchString,  mEdTxtVwTopics.text.toString(),    mEdTxtVwLanguage.text.toString()   )
 
-        observeRepos()
+                if(searchString.trim().length >0)  {
+                    mItemListList.clear()
+                    progressBar.visibility = View.VISIBLE
+
+                    mainViewModel.searchQuery.value = SearchQuery(searchString, mEdTxtVwTopics.text.toString(),    mEdTxtVwLanguage.text.toString(),1)
+                }
 
                 mAlertDialog.dismiss()
+
             }
         }
         mAlertDialog.show()
     }
 
-    override fun onStop() {
-        mainViewModel.clearRetrofitCall()
 
-        super.onStop()
-    }
 
-    fun clearOldCalls()
+
+//endregion
+
+
+    fun prepareUiFromGenericData(genericData: GenericApiResponse<GitResult>)
     {
-        mainViewModel.clearRetrofitCall()
-        mAdapter.clearListInAdapter()
+        when(genericData){
+            is ApiSuccessResponse ->{
+                if(mItemListList.size % 30 != 0)
+                     isQueryExhausted = true
+
+                    txtVwCount.setText("Total count is: " + genericData.body.total_count.toString())
+
+               // mItemListList = genericData.body.items
+                mItemListList.addAll(genericData.body.items)
+
+                mAdapter.setReposInAdapter(mItemListList)
+                progressBar.visibility = View.GONE
+            }
+
+            is ApiErrorResponse ->{
+                Log.d("shaonmvvm" , "2. GOT ERROR RESULT: "+ genericData.errorMessage)
+                progressBar.visibility = View.GONE
+                 Toast.makeText(this@MainActivity,"Something went wrong",Toast.LENGTH_SHORT ).show()
+            }
+
+            is ApiEmptyResponse ->{
+                Log.d("shaonmvvm" , "2. GOT EMPTY RESULT: ")
+                progressBar.visibility = View.GONE
+                Toast.makeText(this@MainActivity,"Something went wrong",Toast.LENGTH_SHORT ).show()
+
+            }
+
+        }
+
     }
+
+
+
 }
