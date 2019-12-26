@@ -65,7 +65,7 @@ class MainRecycleAdapter(val mContext:Context):RecyclerView.Adapter<MainRecycleA
        holder.mTxtVwLang.setText("Language: "+ strLang)
 
         var strDesc = _beanObj.description?.let{ _beanObj.description }?:"N/A"
-        holder.mTxtVwDesc.setText("Description: " + strDesc)
+        holder.mTxtVwDesc.setText(strDesc)
 
 
     }

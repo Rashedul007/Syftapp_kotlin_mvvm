@@ -1,16 +1,20 @@
 package syft.com.syftapp_kotlin_mvvm.ui.main
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.os.CountDownTimer
-import android.util.Log
+import android.text.Html
+import android.text.Html.*
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
+import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
@@ -31,6 +35,8 @@ class MainActivity  : DaggerAppCompatActivity() {
       companion object {
          var searchString: String = ""
     }
+
+    lateinit var toolBar:Toolbar
 
     lateinit var mRecycleVw: RecyclerView
     lateinit var mAdapter: MainRecycleAdapter
@@ -53,6 +59,9 @@ class MainActivity  : DaggerAppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        toolBar =  findViewById(R.id.main_toolbar) as Toolbar
+        setSupportActionBar(toolBar)
+
         initRecyclerView()
 
         progressBar.visibility = View.GONE
@@ -70,11 +79,11 @@ class MainActivity  : DaggerAppCompatActivity() {
         mainViewModel.apiData.observe(this, Observer {
 
            // prepareUiFromGenericData(it)
-            Log.d( "filterTest", "observer 1 triggered "     )
+
         })
 
         mainViewModel.liveResult.observe(this, Observer {
-            Log.d( "filterTest", "observer 2 triggered "     )
+
             prepareUiFromGenericData(it)
         })
     }
@@ -86,19 +95,20 @@ class MainActivity  : DaggerAppCompatActivity() {
         mRecycleVw = findViewById(R.id.rclrVw) as RecyclerView
         val gridLayoutManager = GridLayoutManager(this, 1)
         mRecycleVw.layoutManager = gridLayoutManager
-        mRecycleVw.addItemDecoration(VerticalSpacingItemDecorator(10))
+        //mRecycleVw.addItemDecoration(VerticalSpacingItemDecorator(2))
         mAdapter = MainRecycleAdapter(this)
         mRecycleVw.adapter = mAdapter
 
         mRecycleVw.addOnScrollListener(object:RecyclerView.OnScrollListener(){
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                if(!mRecycleVw.canScrollVertically(1))
-                {
-                    if(!isQueryExhausted)   {
+                if(!mRecycleVw.canScrollVertically(1)) {
+                    if (!mItemListList.isNullOrEmpty() || mItemListList.size != 0) {
+                        if (!isQueryExhausted) {
                             progressBar.visibility = View.VISIBLE
                             mainViewModel.searchNextPage()
                         }
 
+                    }
                 }
             }
 
@@ -127,32 +137,35 @@ class MainActivity  : DaggerAppCompatActivity() {
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                newText?.let {
-                    if(it.trim().length>0) {
+                newText?.let {typedStr ->
+                    searchString = typedStr
+                      cntr?.cancel()
+
+                    if(!searchString.trim().isNullOrEmpty() || !searchString.trim().equals("") ) {
                         progressBar.visibility = View.VISIBLE
 
-                cntr?.cancel()
 
-                cntr = object : CountDownTimer(waitingTime.toLong(), 500) {
-                    override fun onTick(millisUntilFinished: Long) {
-                        Log.d( "shaonmvvm", "seconds remaining: " + millisUntilFinished / 1000       )          }
+                        cntr = object : CountDownTimer(waitingTime.toLong(), 500) {
 
-                    override fun onFinish() {
-                        Log.d("shaonmvvm", "DONE")
+                                override fun onTick(millisUntilFinished: Long) {
+                                    //Log.d( "err_chk", "timer: seconds remaining: " + millisUntilFinished / 1000       )
+                                     }
 
-                                searchString = it
+                                override fun onFinish() {
+                                    mItemListList.clear()
 
-                                mItemListList.clear()
-
-                                mainViewModel.searchQuery.value = SearchQuery(it,"","",1)
-
-                            }
+                                    mainViewModel.searchQuery.value = SearchQuery(searchString, "", "", 1)
+                                }
                         }
-                    }
-                }
-                cntr?.start()
-                return false
 
+                        cntr?.start()
+                    }
+                    else
+                        progressBar.visibility = View.GONE
+
+                }
+
+                return false
             }
 
         })
@@ -164,7 +177,10 @@ class MainActivity  : DaggerAppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.menu_filter -> {
-                 setUpFilterDialog();
+                if(searchString.trim().isNullOrEmpty() || searchString.trim().equals("") )
+                    dialog_msg("Please enter something in search box first")
+                else
+                setUpFilterDialog()
 
                 true
             }
@@ -174,22 +190,44 @@ class MainActivity  : DaggerAppCompatActivity() {
     }
 
     private fun setUpFilterDialog() {
-        val mAlertBuilder =    AlertDialog.Builder(this)
+        val mAlertBuilder =    AlertDialog.Builder(this, R.style.AlertDialogTheme)
         val li = LayoutInflater.from(this)
         val promptsView = li.inflate(R.layout.dialog_filter, null)
-        mAlertBuilder.setPositiveButton("ok", null)
-        mAlertBuilder.setNegativeButton("cancel", null)
+/*        mAlertBuilder.setPositiveButton("ok", null)
+        mAlertBuilder.setNegativeButton("cancel", null)*/
         mAlertBuilder.setView(promptsView)
 
         val mEdTxtVwTopics =    promptsView.findViewById<View>(R.id.edtDl_Topics) as EditText
         val mEdTxtVwLanguage =    promptsView.findViewById<View>(R.id.edtDl_Language) as EditText
 
+        val mbtnOk =    promptsView.findViewById<View>(R.id.dialog_ok) as Button
+        val mbtnCancel =    promptsView.findViewById<View>(R.id.dialog_cancel) as Button
+
         val mAlertDialog = mAlertBuilder.create()
+
+
         mAlertDialog.setOnShowListener {
+            mbtnOk.setOnClickListener { if(!searchString.trim().isNullOrEmpty()){
+                mItemListList.clear()
+                progressBar.visibility = View.VISIBLE
+
+                mainViewModel.searchQuery.value = SearchQuery(searchString, mEdTxtVwTopics.text.toString(),    mEdTxtVwLanguage.text.toString(),1)
+            }
+
+                mAlertDialog.dismiss()
+            }
+
+            mbtnCancel.setOnClickListener{
+                mAlertDialog.dismiss()
+            }
+        }
+
+
+       /* mAlertDialog.setOnShowListener {
             val btnDialog_positive =  mAlertDialog.getButton(AlertDialog.BUTTON_POSITIVE)
             btnDialog_positive.setOnClickListener {
 
-                if(searchString.trim().length >0)  {
+                if(!searchString.trim().isNullOrEmpty()){
                     mItemListList.clear()
                     progressBar.visibility = View.VISIBLE
 
@@ -199,9 +237,25 @@ class MainActivity  : DaggerAppCompatActivity() {
                 mAlertDialog.dismiss()
 
             }
-        }
+        }*/
+
         mAlertDialog.show()
     }
+
+    private fun dialog_msg(msg:String) {
+        AlertDialog.Builder(this@MainActivity)
+            .setMessage(fromHtml("<font color='#c544c5'>$msg</font>"))
+            .setCancelable(false)
+            .setPositiveButton("ok", object : DialogInterface.OnClickListener {
+                override fun onClick(
+                    dialog: DialogInterface?,
+                    which: Int
+                ) {
+                }
+            }).show()
+    }
+
+
 
 
 
@@ -213,12 +267,11 @@ class MainActivity  : DaggerAppCompatActivity() {
     {
         when(genericData){
             is ApiSuccessResponse ->{
-                if(mItemListList.size % 30 != 0)
+                if(mItemListList.size % 30 != 0 )
                      isQueryExhausted = true
 
-                    txtVwCount.setText("Total count is: " + genericData.body.total_count.toString())
+                    txtVwCount.setText("Total count: " + genericData.body.total_count.toString())
 
-               // mItemListList = genericData.body.items
                 mItemListList.addAll(genericData.body.items)
 
                 mAdapter.setReposInAdapter(mItemListList)
@@ -226,15 +279,16 @@ class MainActivity  : DaggerAppCompatActivity() {
             }
 
             is ApiErrorResponse ->{
-                Log.d("shaonmvvm" , "2. GOT ERROR RESULT: "+ genericData.errorMessage)
+               // Log.d("shaonmvvm" , "2. GOT ERROR RESULT: "+ genericData.errorMessage)
                 progressBar.visibility = View.GONE
                  Toast.makeText(this@MainActivity,"Something went wrong",Toast.LENGTH_SHORT ).show()
             }
 
             is ApiEmptyResponse ->{
-                Log.d("shaonmvvm" , "2. GOT EMPTY RESULT: ")
+                // Log.d("err_chk" , "2. GOT EMPTY RESULT: ")
                 progressBar.visibility = View.GONE
                 Toast.makeText(this@MainActivity,"Something went wrong",Toast.LENGTH_SHORT ).show()
+
 
             }
 

@@ -1,12 +1,10 @@
 package syft.com.syftapp_kotlin_mvvm.repository
 
-import android.util.Log
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import io.reactivex.disposables.CompositeDisposable
 import syft.com.syftapp_kotlin_mvvm.models.GitResult
 import syft.com.syftapp_kotlin_mvvm.network.MainApiClient
 import syft.com.syftapp_kotlin_mvvm.utils.GenericApiResponse
+import java.lang.Exception
 import javax.inject.Inject
 
 class MainRepository @Inject constructor(val mainApiClient: MainApiClient) {
@@ -16,9 +14,18 @@ class MainRepository @Inject constructor(val mainApiClient: MainApiClient) {
     private var mfilter_language: String?=null
     private var mPageNumber = 0
 
+    companion object{
+        val SEARCH_NULL = "Search can not be null"
+    }
+
+
 
      fun fetchApiresultFromClient(filter_search: String, filter_topics: String?, filter_language: String?, page_number:Int)
              : LiveData<GenericApiResponse<GitResult>> {
+
+         if (filter_search.equals("") || filter_search.isNullOrEmpty())  {
+             throw Exception(SEARCH_NULL)
+         }
 
          setPreviousApiCallData(filter_search, filter_topics, filter_language ,  page_number)
 

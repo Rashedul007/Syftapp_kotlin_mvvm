@@ -11,9 +11,13 @@
 
 
 
-    <string name="topic">Topics:</string>
-    <string name="hint_topic">type a topics:</string>
-    <string name="language">Language:</string>
-    <string name="hint_language">type a Language:</string>
+    <string name="topic">Topics</string>
+    <string name="hint_topic">Enter a topic</string>
+    <string name="language">Language</string>
+    <string name="hint_language">Enter a Language</string>
+    <string name="filter_dialog_heading">Please enter values for topics and language to filter results</string>
+    <string name="name">::Name::</string>
+    <string name="lang">::lang::</string>
+    <string name="desc">::desc::</string>
 
 </resources>

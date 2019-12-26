@@ -12,72 +12,65 @@
             android:layout_gravity="center"
             android:layout_margin="5dp"
             android:elevation="3dp"
-            card_view:cardCornerRadius="5dp"
-            card_view:cardBackgroundColor="@color/colorListItem">
-
+            card_view:cardCornerRadius="5dp"        >
 
         <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:id="@+id/constraintVw">
+            android:id="@+id/constraintVw"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/cardview_gradiant"
+            android:layout_gravity="start"
+            android:padding="8dp"   >
+
 
             <androidx.constraintlayout.widget.Guideline
-                    android:id="@+id/guideline"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    app:layout_constraintGuide_begin="5dp"/>
-
-            <androidx.constraintlayout.widget.Guideline
-                    android:id="@+id/guideline2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    app:layout_constraintGuide_end="5dp"
-                    app:layout_constraintEnd_toEndOf="parent"/>
+                android:id="@+id/guideline"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_begin="5dp" />
 
 
             <TextView
-                    android:id="@+id/txtVw_Name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:contentDescription="@string/app_name"
-                    android:gravity="center_horizontal"
-                    android:text="::Name::"
-                    android:textColor="@color/colorAccent"
-                    android:textSize="20sp"
-                    android:layout_marginBottom="10dp"
-                    app:layout_constraintStart_toEndOf="@id/guideline"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintEnd_toStartOf="@id/guideline2"/>
+                android:id="@+id/txtVw_Name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:contentDescription="@string/app_name"
+
+                android:gravity="start"
+                android:text="@string/name"
+                android:textColor="#644c8e"
+                android:textSize="15sp"
+                app:layout_constraintStart_toEndOf="@id/guideline"
+                app:layout_constraintTop_toTopOf="parent"
+                />
 
 
             <TextView
-                    android:id="@+id/txtVw_Lang"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:contentDescription="@string/app_name"
-                    android:text="::lang::"
-                    android:textSize="15sp"
-                    android:textStyle="italic"
-                    app:layout_constraintStart_toEndOf="@id/guideline"
-                    app:layout_constraintTop_toBottomOf="@id/txtVw_Name"
-                    app:layout_constraintEnd_toStartOf="@id/guideline2"/>
+                android:id="@+id/txtVw_Lang"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/app_name"
+                android:text="@string/lang"
+                android:textSize="12sp"
+                android:textStyle="italic"
+                app:layout_constraintStart_toEndOf="@id/guideline"
+                app:layout_constraintTop_toBottomOf="@id/txtVw_Name" />
 
             <TextView
-                    android:id="@+id/txtVw_Desc"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/colorTextDesc"
-                    android:contentDescription="@string/app_name"
-                    android:textSize="17sp"
-                    android:layout_marginTop="8dp"
-                    android:text="::desc::"
-                    android:ellipsize="end"
-                    android:maxLines="2"
-                    app:layout_constraintStart_toEndOf="@id/guideline"
-                    app:layout_constraintTop_toBottomOf="@id/txtVw_Lang"
-                    app:layout_constraintEnd_toStartOf="@id/guideline2" />
+                android:id="@+id/txtVw_Desc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:contentDescription="@string/app_name"
+                android:ellipsize="end"
+                android:maxLines="3"
+                android:text="@string/desc"
+                android:textColor="@color/colorTextDesc"
+                android:textSize="13sp"
+                app:layout_constraintStart_toEndOf="@id/guideline"
+                app:layout_constraintTop_toBottomOf="@id/txtVw_Lang" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

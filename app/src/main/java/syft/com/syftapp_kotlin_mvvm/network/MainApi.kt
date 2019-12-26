@@ -18,6 +18,4 @@ interface MainApi {
                     @Query("order") order: String?
         ):LiveData<GenericApiResponse<GitResult>>
 
-
-
 }

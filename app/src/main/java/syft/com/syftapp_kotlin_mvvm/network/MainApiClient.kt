@@ -30,9 +30,4 @@ class MainApiClient  @Inject constructor(val mainApi: MainApi) {
        return apiResult
 
     }
-
-
-
-
-
 }
