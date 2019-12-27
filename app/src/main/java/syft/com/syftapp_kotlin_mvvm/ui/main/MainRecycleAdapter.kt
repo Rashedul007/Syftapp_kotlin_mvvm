@@ -9,15 +9,27 @@ import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import syft.com.syftapp_kotlin_mvvm.R
 import syft.com.syftapp_kotlin_mvvm.models.ItemList
-import kotlin.collections.ArrayList
 
 class MainRecycleAdapter(val mContext:Context):RecyclerView.Adapter<MainRecycleAdapter.MyViewHolder>()
 {
     //private  lateinit var mContext: Context
-    private  var mItemListList: MutableList<ItemList> = ArrayList()
+    private  var mItemListArray: MutableList<ItemList> = ArrayList()
+
+    private var mItemClickListener: onRecyclerViewItemClickListener? =     null
+
+ //region interface 1
+    fun setOnItemClickListener(mItemClickListener: onRecyclerViewItemClickListener?) {
+        this.mItemClickListener = mItemClickListener
+    }
+
+    interface onRecyclerViewItemClickListener {
+        fun onItemClickListener( view: View?,  position: Int,    mGitObj: ItemList?   )
+    }
+//endregion
 
 
-    inner class MyViewHolder(view: View) : RecyclerView.ViewHolder(view){
+    inner class MyViewHolder(view: View) : RecyclerView.ViewHolder(view) ,
+        View.OnClickListener{
 
         var mTxtVwName: TextView
         var mTxtVwLang: TextView
@@ -31,6 +43,14 @@ class MainRecycleAdapter(val mContext:Context):RecyclerView.Adapter<MainRecycleA
             mTxtVwName = view.findViewById(R.id.txtVw_Name) as TextView
             mTxtVwLang = view.findViewById(R.id.txtVw_Lang) as TextView
             mTxtVwDesc = view.findViewById(R.id.txtVw_Desc) as TextView
+
+            cardVw.setOnClickListener(this)
+        }
+
+        override fun onClick(v: View?) {
+            if (mItemClickListener != null)    {
+                mItemClickListener!!.onItemClickListener(  v,  adapterPosition,  mItemListArray.get(adapterPosition)    )
+            }
         }
 
     }
@@ -44,7 +64,7 @@ class MainRecycleAdapter(val mContext:Context):RecyclerView.Adapter<MainRecycleA
     }
 
     override fun getItemCount(): Int {
-        return mItemListList.size
+        return mItemListArray.size
     }
 
     override fun getItemId(position: Int): Long {
@@ -57,7 +77,7 @@ class MainRecycleAdapter(val mContext:Context):RecyclerView.Adapter<MainRecycleA
 
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-        val _beanObj :ItemList = mItemListList[position]
+        val _beanObj :ItemList = mItemListArray[position]
 
         holder.mTxtVwName.setText(_beanObj.name)
 
@@ -72,13 +92,13 @@ class MainRecycleAdapter(val mContext:Context):RecyclerView.Adapter<MainRecycleA
 
     fun setReposInAdapter(gitRepos: MutableList<ItemList> )
     {
-        this.mItemListList = gitRepos
+        this.mItemListArray = gitRepos
         notifyDataSetChanged()
     }
 
     fun clearListInAdapter( )
     {
-        this.mItemListList = ArrayList()
+        this.mItemListArray = ArrayList()
         notifyDataSetChanged()
     }
 

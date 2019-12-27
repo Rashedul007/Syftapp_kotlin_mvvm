@@ -1,9 +1,11 @@
 package syft.com.syftapp_kotlin_mvvm.ui.main
 
 import android.content.DialogInterface
+import android.content.Intent
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.text.Html.fromHtml
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
@@ -24,6 +26,7 @@ import syft.com.syftapp_kotlin_mvvm.R
 import syft.com.syftapp_kotlin_mvvm.models.GitResult
 import syft.com.syftapp_kotlin_mvvm.models.ItemList
 import syft.com.syftapp_kotlin_mvvm.models.SearchQuery
+import syft.com.syftapp_kotlin_mvvm.ui.detail.DetailActivity
 import syft.com.syftapp_kotlin_mvvm.utils.ApiEmptyResponse
 import syft.com.syftapp_kotlin_mvvm.utils.ApiErrorResponse
 import syft.com.syftapp_kotlin_mvvm.utils.ApiSuccessResponse
@@ -120,6 +123,19 @@ class MainActivity  : DaggerAppCompatActivity() {
 
         }
         )
+
+
+        mAdapter.setOnItemClickListener( object: MainRecycleAdapter.onRecyclerViewItemClickListener
+        {
+            override fun onItemClickListener(view: View?, position: Int, mGitObj: ItemList?) {
+                //dialog_msg(""+position.toString() + "--" + mGitObj?.name)
+
+                val intnt = Intent(this@MainActivity, DetailActivity::class.java)
+                    intnt.putExtra("intent_Main_obj", mGitObj)
+                startActivity(intnt)
+            }
+
+        })
 
     }
 

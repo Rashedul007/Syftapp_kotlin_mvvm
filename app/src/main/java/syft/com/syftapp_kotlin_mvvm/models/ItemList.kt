@@ -44,6 +44,7 @@ data class ItemList (
                 parcelIn.readString(),
                 parcelIn.readString(),
                 parcelIn.readString()
+
         )
 
         override fun writeToParcel(dest: Parcel, flags: Int) {
