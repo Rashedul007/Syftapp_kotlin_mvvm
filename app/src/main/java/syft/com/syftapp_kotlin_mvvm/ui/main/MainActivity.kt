@@ -3,8 +3,7 @@ package syft.com.syftapp_kotlin_mvvm.ui.main
 import android.content.DialogInterface
 import android.os.Bundle
 import android.os.CountDownTimer
-import android.text.Html
-import android.text.Html.*
+import android.text.Html.fromHtml
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
@@ -25,7 +24,10 @@ import syft.com.syftapp_kotlin_mvvm.R
 import syft.com.syftapp_kotlin_mvvm.models.GitResult
 import syft.com.syftapp_kotlin_mvvm.models.ItemList
 import syft.com.syftapp_kotlin_mvvm.models.SearchQuery
-import syft.com.syftapp_kotlin_mvvm.utils.*
+import syft.com.syftapp_kotlin_mvvm.utils.ApiEmptyResponse
+import syft.com.syftapp_kotlin_mvvm.utils.ApiErrorResponse
+import syft.com.syftapp_kotlin_mvvm.utils.ApiSuccessResponse
+import syft.com.syftapp_kotlin_mvvm.utils.GenericApiResponse
 import syft.com.syftapp_kotlin_mvvm.viewmodels.ViewModelProviderFactory
 import javax.inject.Inject
 
@@ -68,9 +70,13 @@ class MainActivity  : DaggerAppCompatActivity() {
 
         mainViewModel = ViewModelProvider(this, providerFactory).get( MainViewModel::class.java )
 
+    }
+
+
+    override fun onResume() {
+        super.onResume()
+
         observeRepos()
-
-
     }
 
 
@@ -174,6 +180,7 @@ class MainActivity  : DaggerAppCompatActivity() {
         return true
     }
 
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.menu_filter -> {
@@ -222,23 +229,6 @@ class MainActivity  : DaggerAppCompatActivity() {
             }
         }
 
-
-       /* mAlertDialog.setOnShowListener {
-            val btnDialog_positive =  mAlertDialog.getButton(AlertDialog.BUTTON_POSITIVE)
-            btnDialog_positive.setOnClickListener {
-
-                if(!searchString.trim().isNullOrEmpty()){
-                    mItemListList.clear()
-                    progressBar.visibility = View.VISIBLE
-
-                    mainViewModel.searchQuery.value = SearchQuery(searchString, mEdTxtVwTopics.text.toString(),    mEdTxtVwLanguage.text.toString(),1)
-                }
-
-                mAlertDialog.dismiss()
-
-            }
-        }*/
-
         mAlertDialog.show()
     }
 
@@ -258,8 +248,6 @@ class MainActivity  : DaggerAppCompatActivity() {
 
 
 
-
-
 //endregion
 
 
@@ -270,7 +258,7 @@ class MainActivity  : DaggerAppCompatActivity() {
                 if(mItemListList.size % 30 != 0 )
                      isQueryExhausted = true
 
-                    txtVwCount.setText("Total count: " + genericData.body.total_count.toString())
+                    txtVwCount.setText("Search result: " + genericData.body.total_count.toString())
 
                 mItemListList.addAll(genericData.body.items)
 
